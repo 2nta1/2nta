@@ -248,6 +248,20 @@
         "manage_jobs": "الوظائف",
         "company_settings": "إعدادات الشركة"
     },
+    "post_generator": {
+        "title": "البوست جيتور الذكي",
+        "placeholder": "اكتب تفاصيل بسيطة هنا...",
+        "choose_type": "اختر نوع المنشور",
+        "generate": "توليد بالذكاء الاصطناعي",
+        "generating": "جاري التوليد...",
+        "type_hiring": "إعلان توظيف 🎯",
+        "type_milestone": "إنجاز جديد 🎉",
+        "type_news": "خبر للشركة 📢",
+        "type_tips": "نصيحة مهنية 💡",
+        "success": "تم إنشاء المنشور بنجاح!",
+        "error": "حدث خطأ أثناء النشر",
+        "post": "نشر"
+    },
     "user": {
         "welcome": "مرحباً",
         "default_user": "مستخدم 2نتة",

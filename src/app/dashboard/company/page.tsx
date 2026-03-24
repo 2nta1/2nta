@@ -2,55 +2,52 @@
 
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { FiBriefcase, FiMapPin, FiDollarSign, FiClock, FiEdit2, FiTrash2, FiUsers, FiEye, FiPlus } from 'react-icons/fi'
+import { FiBriefcase, FiMapPin, FiDollarSign, FiClock, FiEdit2, FiTrash2, FiUsers, FiEye, FiPlus, FiMessageSquare, FiZap } from 'react-icons/fi'
 import Link from 'next/link'
 import { useLanguage } from '@/context/LanguageContext'
 import { translateText } from '@/utils/categoryTranslations'
 import { translateLocation } from '@/utils/locationTranslations'
+import PostGenerator from '@/components/company/PostGenerator'
 
-interface Job {
+interface Post {
   id: string
-  title: string
-  description: string
-  careerPath: string
-  workType: string
-  country: string
-  city: string
-  salaryFrom: number | null
-  salaryTo: number | null
+  content: string
+  type: string
+  image: string | null
   createdAt: string
-  isApproved: boolean
-  _count?: {
-    matches: number
+  company: {
+    name: string
+    image: string | null
   }
 }
 
 export default function CompanyDashboard() {
   const { data: session } = useSession()
   const { t, locale } = useLanguage()
-  const [jobs, setJobs] = useState<Job[]>([])
+  const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({ activeJobs: 0, totalMatches: 0, profileViews: 842 })
-  const [showPostBox, setShowPostBox] = useState(false)
+  const [showGenerator, setShowGenerator] = useState(false)
 
   useEffect(() => {
-    fetchCompanyJobs()
+    fetchCompanyData()
   }, [])
 
-  const fetchCompanyJobs = async () => {
+  const fetchCompanyData = async () => {
     try {
       const res = await fetch('/api/company/posts')
       if (res.ok) {
         const data = await res.json()
-        setJobs(data)
+        setPosts(data)
+        // Static stats for demo, in production these would come from a dedicated stats API
         setStats(prev => ({
           ...prev,
-          activeJobs: data.filter((j: Job) => j.isApproved).length,
-          totalMatches: data.reduce((sum: number, j: Job) => sum + (j._count?.matches || 0), 0)
+          activeJobs: 3,
+          totalMatches: 12
         }))
       }
     } catch (error) {
-      console.error('Error fetching jobs:', error)
+      console.error('Error fetching data:', error)
     } finally {
       setLoading(false)
     }
@@ -122,28 +119,34 @@ export default function CompanyDashboard() {
         </div>
       </div>
 
-      {/* Create Post Box - Professional Creation Tool Style */}
-      <div className="glass-card rounded-[2.5rem] p-6 mb-10 border-white/60 relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl" />
-        <div className="flex items-center gap-4 relative z-10">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-500/20">
-            {session?.user?.name?.charAt(0) || 'C'}
+      {/* Post Generator - Premium Tool */}
+      {showGenerator ? (
+        <PostGenerator 
+          companyName={session?.user?.name || "شركتنا"} 
+          onPostCreated={() => {
+            setShowGenerator(false)
+            fetchCompanyData()
+          }}
+        />
+      ) : (
+        <div className="glass-card rounded-[2.5rem] p-6 mb-10 border-white/60 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl" />
+          <div className="flex items-center gap-4 relative z-10">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-500/20">
+              {session?.user?.name?.charAt(0) || 'C'}
+            </div>
+            <button
+              onClick={() => setShowGenerator(true)}
+              className="flex-1 px-6 py-4 bg-slate-50/50 hover:bg-white border border-slate-100 rounded-2xl text-slate-400 text-sm font-bold transition-all hover:border-blue-500/30 hover:shadow-md text-right flex items-center justify-between"
+            >
+              <span>{locale === 'ar' ? '📢 ماذا يدور في شركتك؟ انشر وظيفة أو إنجاز جديد...' : '📢 What\'s on your mind? Post a job or milestone...'}</span>
+              <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                <FiPlus />
+              </div>
+            </button>
           </div>
-          <Link
-            href="/dashboard/company/jobs/new"
-            className="flex-1 px-6 py-4 bg-slate-50/50 hover:bg-white border border-slate-100 rounded-2xl text-slate-400 text-sm font-bold transition-all hover:border-blue-500/30 hover:shadow-md cursor-pointer"
-          >
-            {locale === 'ar' ? '📢 ماذا يدور في شركتك؟ انشر وظيفة أو تحديث جديد...' : '📢 What\'s on your mind? Post a new job or update...'}
-          </Link>
-          <Link
-            href="/dashboard/company/jobs/new"
-            className="px-8 py-4 btn-gradient rounded-2xl font-black text-sm flex items-center gap-2"
-          >
-            <FiPlus className="w-5 h-5" />
-            {locale === 'ar' ? 'نشر' : 'Post'}
-          </Link>
         </div>
-      </div>
+      )}
 
       {/* Company Activity Feed */}
       <div className="space-y-6">
@@ -158,10 +161,10 @@ export default function CompanyDashboard() {
           </div>
         </div>
 
-        {jobs.length === 0 ? (
+        {posts.length === 0 ? (
           <div className="glass-card rounded-[3rem] p-16 text-center border-dashed border-2 border-slate-200 bg-transparent">
             <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-[2.5rem] flex items-center justify-center shadow-inner">
-              <FiBriefcase className="w-12 h-12 text-blue-300" />
+              <FiMessageSquare className="w-12 h-12 text-blue-300" />
             </div>
             <h3 className="text-2xl font-black text-slate-800 mb-3">
               {locale === 'ar' ? 'ابدأ بمشاركة أخبار شركتك' : 'Start sharing your company news'}
@@ -169,106 +172,64 @@ export default function CompanyDashboard() {
             <p className="text-slate-500 mb-8 max-w-sm mx-auto font-medium">
               {locale === 'ar' ? 'المنشورات الاحترافية تساعد في جذب أفضل الكفاءات والمبدعين لعملك' : 'Professional posts help attract the best creative talents to your business'}
             </p>
-            <Link
-              href="/dashboard/company/jobs/new"
+            <button
+              onClick={() => setShowGenerator(true)}
               className="inline-flex items-center gap-3 px-10 py-4 btn-gradient rounded-2xl font-black shadow-xl"
             >
-              <FiPlus className="w-5 h-5" />
-              {locale === 'ar' ? 'انشر أول وظيفة' : 'Post First Job'}
-            </Link>
+              <FiZap className="w-5 h-5" />
+              {locale === 'ar' ? 'انشر أول بوست ذكي' : 'Post First Smart Post'}
+            </button>
           </div>
         ) : (
-          jobs.map((job) => (
+          posts.map((post) => (
             <article
-              key={job.id}
+              key={post.id}
               className="glass-card rounded-[2.5rem] overflow-hidden hover:scale-[1.01] transition-all duration-500 group premium-shadow"
             >
               {/* Post Header */}
               <div className="p-6 flex items-center justify-between border-b border-slate-100/50">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-blue-500/20">
-                    {session?.user?.name?.charAt(0) || 'C'}
+                    {post.company?.image ? (
+                      <img src={post.company.image} alt="" className="w-full h-full object-cover rounded-2xl" />
+                    ) : (
+                      post.company?.name?.charAt(0) || 'C'
+                    )}
                   </div>
                   <div>
-                    <h3 className="font-black text-slate-900 text-lg group-hover:text-blue-600 transition-colors">{session?.user?.name}</h3>
+                    <h3 className="font-black text-slate-900 text-lg group-hover:text-blue-600 transition-colors">{post.company.name}</h3>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-tighter">
-                      {getTimeAgo(job.createdAt)} • {locale === 'ar' ? 'نشر وظيفة' : 'Posted a job'}
+                      {getTimeAgo(post.createdAt)} • {translateText(post.type, locale)}
                     </p>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  {!job.isApproved && (
-                    <span className="px-5 py-2 bg-amber-50 text-amber-600 rounded-full text-[11px] font-black uppercase tracking-tighter border border-amber-100">
-                      {locale === 'ar' ? '⏳ قيد المراجعة' : '⏳ Pending'}
-                    </span>
-                  )}
-                  <Link
-                    href={`/dashboard/company/jobs/${job.id}/edit`}
-                    className="w-12 h-12 rounded-2xl bg-slate-50 hover:bg-white hover:text-blue-600 hover:shadow-lg transition-all flex items-center justify-center text-slate-400 border border-transparent hover:border-slate-100"
-                  >
-                    <FiEdit2 className="w-5 h-5" />
-                  </Link>
                 </div>
               </div>
 
               {/* Post Content */}
               <div className="p-8">
-                <h2 className="text-2xl font-black text-slate-900 mb-4 leading-tight group-hover:translate-x-1 transition-transform">
-                  {job.title}
-                </h2>
-
-                <p className="text-slate-600 mb-8 line-clamp-3 text-base leading-relaxed font-medium">
-                  {job.description}
+                <p className="text-slate-800 text-lg leading-relaxed font-medium whitespace-pre-wrap">
+                  {post.content}
                 </p>
 
-                {/* Job Tags - Premium Badges */}
-                <div className="flex flex-wrap gap-3 mb-6">
-                  <span className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50/50 text-blue-700 rounded-xl text-xs font-black uppercase tracking-tighter border border-blue-100/50">
-                    <FiBriefcase className="w-4 h-4" />
-                    {translateText(job.careerPath, locale)}
-                  </span>
-
-                  <span className="inline-flex items-center gap-2 px-4 py-2 bg-purple-50/50 text-purple-700 rounded-xl text-xs font-black uppercase tracking-tighter border border-purple-100/50">
-                    <FiClock className="w-4 h-4" />
-                    {translateText(job.workType, locale)}
-                  </span>
-
-                  <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-50/50 text-green-700 rounded-xl text-xs font-black uppercase tracking-tighter border border-green-100/50">
-                    <FiMapPin className="w-4 h-4" />
-                    {translateLocation(job.city, locale)}, {translateLocation(job.country, locale)}
-                  </span>
-
-                  {job.salaryFrom && (
-                    <span className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50/50 text-amber-700 rounded-xl text-xs font-black uppercase tracking-tighter border border-amber-100/50">
-                      <FiDollarSign className="w-4 h-4" />
-                      {job.salaryFrom?.toLocaleString()} - {job.salaryTo?.toLocaleString()}
-                    </span>
-                  )}
-                </div>
+                {post.image && (
+                  <div className="mt-6 rounded-3xl overflow-hidden border border-slate-100 shadow-lg">
+                    <img src={post.image} alt="post" className="w-full object-cover max-h-[400px]" />
+                  </div>
+                ) }
               </div>
 
-              {/* Post Stats - Modern Interaction Bar */}
+              {/* Interaction Bar */}
               <div className="px-8 py-5 border-t border-slate-100/50 bg-slate-50/50 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3].map(i => (
-                      <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-slate-200 overflow-hidden shadow-sm">
-                        <div className="w-full h-full bg-gradient-to-br from-slate-300 to-slate-400" />
-                      </div>
-                    ))}
-                  </div>
-                  <span className="text-xs font-black text-slate-400 uppercase tracking-tighter ml-2">
-                    {job._count?.matches || 0} {locale === 'ar' ? 'مطابقات ذكية' : 'Smart Matches'}
-                  </span>
+                <div className="flex items-center gap-4">
+                  <button className="flex items-center gap-2 text-slate-400 hover:text-blue-600 transition-all font-black text-xs uppercase tracking-widest">
+                    <span className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center">👍</span>
+                    {locale === 'ar' ? 'أعجبني' : 'Like'}
+                  </button>
+                  <button className="flex items-center gap-2 text-slate-400 hover:text-blue-600 transition-all font-black text-xs uppercase tracking-widest">
+                    <span className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center">💬</span>
+                    {locale === 'ar' ? 'تعليق' : 'Comment'}
+                  </button>
                 </div>
-
-                <Link
-                  href={`/dashboard/company/jobs/${job.id}`}
-                  className="px-6 py-2.5 bg-white text-blue-600 rounded-xl text-xs font-black uppercase tracking-widest border border-blue-100 shadow-sm hover:shadow-md hover:bg-blue-600 hover:text-white transition-all"
-                >
-                  {locale === 'ar' ? 'عرض المرشحين ←' : 'View Candidates →'}
-                </Link>
               </div>
             </article>
           ))

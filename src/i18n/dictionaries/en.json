@@ -249,6 +249,20 @@
         "manage_jobs": "Jobs",
         "company_settings": "Company Settings"
     },
+    "post_generator": {
+        "title": "AI Post Generator",
+        "placeholder": "Type simple details here...",
+        "choose_type": "Choose Post Type",
+        "generate": "Generate with AI",
+        "generating": "Generating...",
+        "type_hiring": "Hiring 🎯",
+        "type_milestone": "Milestone 🎉",
+        "type_news": "Company News 📢",
+        "type_tips": "Career Tips 💡",
+        "success": "Post created successfully!",
+        "error": "Error creating post",
+        "post": "Post"
+    },
     "user": {
         "welcome": "Welcome",
         "default_user": "2NTA User",
