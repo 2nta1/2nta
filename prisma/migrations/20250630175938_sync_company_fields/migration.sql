@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Company" ADD COLUMN     "role" TEXT NOT NULL DEFAULT 'COMPANY';

@@ -1,0 +1,302 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  name      String?
+  email     String    @unique
+  password  String
+  role      Role      @default(USER)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  // Relations
+  matches   Match[]
+  userChats UserChat[]
+  messages  Message[]
+  tokens    Token[]
+  resume    Resume?
+  posts     Post[]
+  notifications Notification[] @relation("UserNotifications")
+  chats         Chat[]         @relation("UserChats")
+  
+  // Profile fields
+  image     String?
+  birthDate String?
+  phone     String?
+  whatsapp  String?
+  linkedin  String?
+  facebook  String?
+
+  @@index([email])
+}
+
+model Company {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  role      Role      @default(COMPANY)
+  
+  // Profile fields
+  specialty      String?
+  image          String?
+  phone          String?
+  googleMapsLink String?
+  website        String?
+  industry       String?
+  foundedYear    Int?
+  description    String?
+  country        String?
+  province       String?
+  region         String?
+  city           String?
+  address        String?
+  companySize    String?
+  products       String?
+  commercialNumber String?
+  contactPerson  String?
+
+  // Relations
+  clients        String? // Description of clients for profile
+
+  // Relations
+  jobs      Job[]
+  matches   Match[]
+  crmClients Client[]
+  posts     Post[]
+  chats     Chat[]    @relation("CompanyChats")
+  
+  @@index([email])
+}
+
+model Job {
+  id          String    @id @default(uuid())
+  title       String
+  description String
+  category    String?
+  specialty   String?
+  requirements String[]
+  skills      String[]
+  educationLevel String?
+  experience     String?
+  location    String?
+  salary      String?
+  type        String?
+  workplace   String?
+  languages   String[]
+  softSkills  String[]
+  startDate   String?
+  deadline    String?
+  benefits    String[]
+  culture     String?
+  careerPath  String?
+  graduationYear String?
+  isApproved  Boolean   @default(false)
+  companyId   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  company     Company   @relation(fields: [companyId], references: [id])
+  matches     Match[]
+  
+  @@index([companyId])
+}
+
+model Match {
+  id        String      @id @default(uuid())
+  userId    String
+  jobId     String
+  companyId String
+  status    MatchStatus @default(PENDING)
+  score     Float
+  notes     String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  // Relations
+  company   Company     @relation(fields: [companyId], references: [id])
+  job       Job         @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id])
+  chat      Chat?
+
+  @@unique([userId, jobId])
+  @@index([jobId])
+  @@index([userId])
+}
+
+model Chat {
+  id        String    @id @default(uuid())
+  type      ChatType  @default(MATCH)
+  userId    String?
+  companyId String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  // Relations
+  messages  Message[]
+  userChats UserChat[]
+  match     Match?    @relation(fields: [matchId], references: [id])
+  matchId   String?   @unique
+  user      User?     @relation("UserChats", fields: [userId], references: [id])
+  company   Company?  @relation("CompanyChats", fields: [companyId], references: [id])
+}
+
+model Message {
+  id        String    @id @default(uuid())
+  chatId    String
+  senderId  String
+  content   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  readAt    DateTime?
+  
+  // Relations
+  sender    User      @relation(fields: [senderId], references: [id])
+  chat      Chat      @relation(fields: [chatId], references: [id])
+}
+
+model UserChat {
+  id        String    @id @default(uuid())
+  userId    String
+  chatId    String
+  unread    Int      @default(0)
+  
+  // Relations
+  user      User     @relation(fields: [userId], references: [id])
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  
+  @@unique([userId, chatId])
+}
+
+// Enums
+enum Role {
+  USER
+  COMPANY
+  ADMIN
+}
+
+enum MatchStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum ChatType {
+  MATCH
+  SUPPORT
+  GROUP
+}
+
+model Client {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  phone     String
+  companyId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  company   Company  @relation(fields: [companyId], references: [id])
+  
+  @@index([companyId])
+}
+
+model Token {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+}
+
+model Resume {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category       String
+  specialty      String?
+  careerPath     String
+  role           String
+  experience     String
+  jobLevel       String
+  education      String
+  languages      String[] // Array of "name:level"
+  skills         String[] // Array of "name:level" (technical skills)
+  softSkills     String[] // Array of "name:level"
+  workType       String
+  country        String
+  region         String?
+  city           String
+  expectedSalary String?
+  relocate       Boolean  @default(false)
+  employmentType String
+  graduationYear String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model DiscoveredConstant {
+  id        String   @id @default(uuid())
+  type      String   // 'CATEGORY', 'SPECIALTY', 'SKILL'
+  value     String
+  parent    String?  // category for specialties, specialty or category for skills
+  count     Int      @default(1)
+  isApproved Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([type, value, parent])
+}
+
+model Post {
+  id        String   @id @default(uuid())
+  type      String   @default("GENERAL") // e.g., 'JOB', 'GENERAL'
+  content   String?
+  image     String?
+  userId    String?
+  companyId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user      User?    @relation(fields: [userId], references: [id])
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  @@index([userId])
+  @@index([companyId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  companyId String?
+  type      String
+  title     String
+  message   String
+  data      Json?
+  readAt    DateTime?
+  chatId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+

@@ -1,0 +1,18 @@
+{
+  "مهندس شبكات": {
+    "tech": [
+      "CCNA", "CCNP", "OSPF", "BGP", "Cisco IOS", "Switching", "Routing", "Firewall", "Wireshark", "MikroTik",
+      "Windows Server", "Active Directory", "Network Security", "Fortinet", "Juniper", "Cisco ASA", "VPN", "Load Balancer", "VoIP", "Fiber Optics",
+      "SNMP", "NAC", "QoS", "SolarWinds", "Zabbix", "Splunk"
+    ],
+    "languages": ["العربية", "English"],
+    "soft": ["حل المشكلات", "العمل تحت الضغط", "التواصل"]
+  },
+  "أخصائي تسويق رقمي": {
+    "tech": [
+      "SEO", "SEM", "Google Analytics", "Google Ads", "Facebook Ads", "Instagram Ads", "TikTok Ads", "Mailchimp", "HubSpot", "Hootsuite", "Canva"
+    ],
+    "languages": ["العربية", "English"],
+    "soft": ["الإبداع", "التواصل", "التفاوض", "إدارة الوقت"]
+  }
+}

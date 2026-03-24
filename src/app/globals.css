@@ -3,31 +3,117 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --primary: 221.2 83.2% 45%;
+  --primary-foreground: 210 40% 98%;
+  --background: 210 40% 98%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --border: 214.3 31.8% 91.4%;
+  --radius: 1rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+@layer base {
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply min-h-screen bg-[#F0F2F5] text-slate-900;
+    direction: rtl;
+    text-align: right;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+@layer components {
+  .glass-card {
+    background-color: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+  }
+
+  .premium-shadow {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02),
+      0 10px 20px rgba(0, 0, 0, 0.04),
+      0 20px 40px rgba(0, 0, 0, 0.04);
+  }
+
+  .nav-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative overflow-hidden;
+  }
+
+  .nav-item-active {
+    @apply bg-gradient-to-r from-blue-600/10 to-purple-600/10 text-blue-600 font-bold border border-blue-500/20 shadow-sm;
+  }
+
+  .nav-item-inactive {
+    @apply text-slate-500 hover:bg-slate-100/80 hover:text-slate-900;
+  }
+
+  .social-button {
+    @apply flex items-center justify-center gap-2 flex-1 py-2.5 rounded-xl text-slate-600 hover:bg-slate-50 transition-all duration-200 font-semibold border border-transparent hover:border-slate-100 hover:shadow-sm;
+  }
+
+  .btn-gradient {
+    @apply bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98];
+  }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* RTL support for ReactQuill */
+.react-quill .ql-editor {
+  direction: rtl;
+  text-align: right;
+  @apply bg-white text-slate-900 !important;
+}
+
+.react-quill .ql-toolbar.ql-snow {
+  direction: rtl;
+  text-align: right;
+  @apply bg-slate-50 border-slate-200 !important;
+}
+
+/* Custom Scrollbar for a cleaner look */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 rounded-full hover:bg-slate-400;
+}
+
+/* Premium Typography Rules */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @apply tracking-tight text-slate-900;
+}
+
+/* Remove the old forced black rule to allow for hierarchical grays */
+select option {
+  @apply bg-white text-slate-900;
+}
+
+input::placeholder,
+textarea::placeholder {
+  @apply text-slate-400 !important;
+}
+
+/* Ensure form elements look premium */
+input,
+select,
+textarea {
+  @apply border-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all !important;
 }

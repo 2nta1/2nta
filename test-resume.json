@@ -1,0 +1,23 @@
+{
+    "category": "IT",
+    "specialty": "Software Engineering",
+    "techSkills": [
+        {
+            "name": "React",
+            "level": "Expert"
+        }
+    ],
+    "careerPath": "Developer",
+    "role": "Frontend",
+    "experience": "5",
+    "jobLevel": "Mid-Senior",
+    "education": "Bachelor",
+    "languages": [],
+    "softSkills": [],
+    "workType": "Remote",
+    "country": "Egypt",
+    "city": "Cairo",
+    "region": "Maadi",
+    "employmentType": "Full-time",
+    "graduationYear": 2020
+}
